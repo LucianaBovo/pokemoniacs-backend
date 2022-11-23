@@ -2,7 +2,7 @@ const pg = require('pg');
 
 const connectionString = process.env.DATABASE_URL;
 
-const pool = new pg.Pool({ connectionString })
+const pool = new pg.Pool({ connectionString, ssl: { rejectUnauthorized: false } })
 
 const query = async (q, values) => {
   const client = await pool.connect();
