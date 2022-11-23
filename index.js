@@ -103,6 +103,6 @@ app.post('/users/:userId/cards', async (req, res) => {
 });
 
 
-app.listen(3001, () => {
+app.listen(process.env.PORT || 3001, () => {
   console.log('app listening on port 3001');
 });
