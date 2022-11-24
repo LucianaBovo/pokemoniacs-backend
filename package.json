@@ -6,19 +6,19 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "socket": "nodemon socket.js",
+    "dev": "node index.js",
     "start": "pm2-runtime start ecosystem.config.js --env production"
   },
   "author": "Farhana, Luciana, Thomas",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.2.0",
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "nodemon": "^2.0.20",
-    "pm2": "^4.4.1",
     "pg": "^8.8.0",
+    "pm2": "^4.4.1",
     "socket.io": "^4.5.3",
     "uuidv4": "^6.2.13"
   }
