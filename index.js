@@ -14,7 +14,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // This set all routes to be authenticated by auth0
-app.use(jwtCheck);
+// app.use(jwtCheck);
 
 app.get("/", async (req, res) => {
   return res.json({ success: true });
@@ -114,3 +114,6 @@ app.post("/users/:userId/cards", async (req, res) => {
 attachSocketIO(app).listen(process.env.PORT || 3001, () => {
   console.log("app listening on port 3001");
 });
+// app.listen(process.env.PORT || 3001, () => {
+//   console.log("app listening on port 3001");
+// });
