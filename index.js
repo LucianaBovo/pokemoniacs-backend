@@ -7,7 +7,7 @@ dotenv.config();
 const { attachSocketIO } = require("./src/socketio/socket.js");
 const UsersService = require("./src/service/users-service");
 const CardsService = require("./src/service/cards-service");
-const { jwtCheck } = require("./src/utils/auth");
+const { jwtCheck, getUsers, getUser } = require("./src/utils/auth");
 
 const app = express();
 app.use(cors());
@@ -70,6 +70,38 @@ app.post("/users", async (req, res) => {
   }
 });
 
+app.get("/auth0/users", jwtCheck, async (req, res) => {
+  const users = await getUsers(req.query.searchTerm);
+
+  return res.status(200).json(
+    users.map((user) => {
+      return {
+        name: user.name,
+        picture: user.picture,
+        userId: user.user_id,
+      };
+    })
+  );
+});
+
+app.get("/auth0/users/:userId", jwtCheck, async (req, res) => {
+  const userId = req.params.userId;
+
+  if (!userId) {
+    return res.status(400).json({
+      message: "Please provide a userId",
+    });
+  }
+
+  const user = await getUser(userId);
+
+  return res.status(200).json({
+    name: user.name,
+    picture: user.picture,
+    userId: user.user_id,
+  });
+});
+
 app.get("/cards/available", async (req, res) => {
   try {
     const result = await CardsService.getAvailableCards();
@@ -114,6 +146,3 @@ app.post("/users/:userId/cards", async (req, res) => {
 attachSocketIO(app).listen(process.env.PORT || 3001, () => {
   console.log("app listening on port 3001");
 });
-// app.listen(process.env.PORT || 3001, () => {
-//   console.log("app listening on port 3001");
-// });

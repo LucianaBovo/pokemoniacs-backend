@@ -6,13 +6,14 @@ const { Server } = require("socket.io");
 const http = require("http");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
-const { verifyJwtCheck } = require("../utils/auth");
+const { verifyJwtCheck, getUser } = require("../utils/auth");
 
 const attachSocketIO = (app) => {
+  const connectedSockets = {};
   const server = http.createServer(app);
   const io = new Server(server, {
     cors: {
-      origin: "http://localhost:3000",
+      origin: process.env.CORS_ORIGIN,
       methods: ["GET", "POST"],
     },
   });
@@ -24,7 +25,7 @@ const attachSocketIO = (app) => {
           socket.handshake.query.accessToken
         );
 
-        socket.sub = sub;
+        socket.user = await getUser(sub);
 
         return next();
       } catch (error) {
@@ -36,21 +37,54 @@ const attachSocketIO = (app) => {
   });
 
   io.on("connection", (socket) => {
-    console.log(`User connected: ${socket.id} with id: ${socket.sub}`);
+    const userIdentifier = `${socket.id}/${socket.user.user_id}`;
+    console.log(`User connected: ${userIdentifier}`);
 
-    socket.on("join_room", (data) => {
-      console.log(`${socket.id}/${socket.sub} has join room: ${data}`);
+    if (!connectedSockets[socket.user.user_id])
+      connectedSockets[socket.user.user_id] = [];
 
-      socket.join(data);
+    connectedSockets[socket.user.user_id].push(socket);
+
+    socket.on("join_direct_message", (userId) => {
+      console.log(`${userIdentifier} has join direct_message: ${userId}`);
+
+      socket.join(`${socket.user.user_id}:${userId}`);
     });
 
-    socket.on("send_message", (data) => {
+    socket.on("send_message", async (data) => {
+      const toUser = await getUser(data.toUser);
+
       console.log(
-        `Received message from ${socket.id}/${socket.sub} at room: ${data.room} and message: ${data.message}`
+        `Received message from ${userIdentifier} at user: ${data.toUser} and message: ${data.message}`
       );
-      socket.emit("receive_message", data);
+
+      socket.emit("receive_message", {
+        toUser: {
+          id: toUser.user_id,
+          picture: toUser.picture,
+          name: toUser.name,
+        },
+        fromUser: {
+          id: socket.user.user_id,
+          picture: socket.user.picture,
+          name: socket.user.name,
+        },
+        message: data.message,
+      });
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log(
+        `User disconnected: ${socket.id} with id: ${socket.user.user_id} and reason: ${reason}`
+      );
+
+      connectedSockets[socket.user.user_id] = (
+        connectedSockets[socket.user.user_id] ?? []
+      ).filter((s) => socket.id !== s.id);
     });
   });
+
+  io.on("disconnect", (socket) => {});
 
   return server;
 };

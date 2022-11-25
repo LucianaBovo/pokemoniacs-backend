@@ -5,13 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "socket": "nodemon socket.js",
     "dev": "node index.js",
-    "start": "pm2-runtime start ecosystem.config.js --env production"
+    "start": "pm2-runtime start ecosystem.config.js --env production",
+    "start:dev": "nodemon index.js"
   },
   "author": "Farhana, Luciana, Thomas",
   "license": "ISC",
   "dependencies": {
+    "auth0": "^2.44.0",
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
