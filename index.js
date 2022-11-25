@@ -7,6 +7,8 @@ dotenv.config();
 const { attachSocketIO } = require("./src/socketio/socket.js");
 const UsersService = require("./src/service/users-service");
 const CardsService = require("./src/service/cards-service");
+const ChatRoomsService = require("./src/service/chat-rooms-service");
+const ChatRoomMessageService = require("./src/service/chat-room-messages-service");
 const { jwtCheck, getUsers, getUser } = require("./src/utils/auth");
 
 const app = express();
@@ -141,6 +143,33 @@ app.post("/users/:userId/cards", async (req, res) => {
   } catch (error) {
     return res.status(500).json({ error: "Error creating card for user." });
   }
+});
+
+app.use("/chat-rooms", jwtCheck, async (req, res) => {
+  const user = await UsersService.getUserBySub(req.auth.sub);
+  const rooms = await ChatRoomsService.getChatRooms(user.id);
+
+  return res.status(200).json(rooms);
+});
+
+app.use("/messages/:userId", jwtCheck, async (req, res) => {
+  const user = await UsersService.getUserBySub(req.auth.sub);
+  const room = await ChatRoomsService.getChatRoom(user.id, req.params.userId);
+
+  if (!room) {
+    return res.status(200).json([]);
+  }
+
+  const messages = await ChatRoomMessageService.getMessagesForRoom(room.id);
+
+  return res.status(200).json(
+    messages.map((message) => {
+      return {
+        message: message.message,
+        userName: message.userName,
+      };
+    })
+  );
 });
 
 attachSocketIO(app).listen(process.env.PORT || 3001, () => {

@@ -7,9 +7,13 @@ const http = require("http");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const { verifyJwtCheck, getUser } = require("../utils/auth");
+const UsersService = require("../service/users-service");
+const ChatRoomService = require("../service/chat-rooms-service");
+const ChatRoomMessageService = require("../service/chat-room-messages-service");
+
+const users = {};
 
 const attachSocketIO = (app) => {
-  const connectedSockets = {};
   const server = http.createServer(app);
   const io = new Server(server, {
     cors: {
@@ -25,7 +29,15 @@ const attachSocketIO = (app) => {
           socket.handshake.query.accessToken
         );
 
-        socket.user = await getUser(sub);
+        socket.user = await UsersService.getUserBySub(sub);
+
+        (await ChatRoomService.getChatRooms(socket.user.id)).forEach(
+          (chatRoom) => {
+            console.log(`${socket.user.id} has join room: ${chatRoom.id}`);
+
+            socket.join(chatRoom.id);
+          }
+        );
 
         return next();
       } catch (error) {
@@ -37,39 +49,48 @@ const attachSocketIO = (app) => {
   });
 
   io.on("connection", (socket) => {
-    const userIdentifier = `${socket.id}/${socket.user.user_id}`;
-    console.log(`User connected: ${userIdentifier}`);
-
-    if (!connectedSockets[socket.user.user_id])
-      connectedSockets[socket.user.user_id] = [];
-
-    connectedSockets[socket.user.user_id].push(socket);
-
-    socket.on("join_direct_message", (userId) => {
-      console.log(`${userIdentifier} has join direct_message: ${userId}`);
-
-      socket.join(`${socket.user.user_id}:${userId}`);
-    });
+    console.log(`User connected: ${socket.user.id}`);
 
     socket.on("send_message", async (data) => {
-      const toUser = await getUser(data.toUser);
+      if (!data.userId || !data.message) {
+        console.log("No userId or message ");
+        return;
+      }
 
-      console.log(
-        `Received message from ${userIdentifier} at user: ${data.toUser} and message: ${data.message}`
+      let chatRoom = await ChatRoomService.getChatRoom(
+        socket.user.id,
+        data.userId
       );
 
-      socket.emit("receive_message", {
-        toUser: {
-          id: toUser.user_id,
-          picture: toUser.picture,
-          name: toUser.name,
-        },
-        fromUser: {
-          id: socket.user.user_id,
-          picture: socket.user.picture,
-          name: socket.user.name,
-        },
+      if (!chatRoom) {
+        chatRoom = await ChatRoomService.createChatRoom(
+          socket.user.id,
+          data.userId
+        );
+
+        socket.join(chatRoom.id);
+      }
+
+      console.log(
+        `Received message from ${socket.user.id} message: ${data.message} room: ${chatRoom.id}`
+      );
+
+      await ChatRoomMessageService.createMessage(
+        chatRoom.id,
+        socket.user.id,
+        data.message
+      );
+
+      // Send to other user
+      socket.to(chatRoom.id).emit("receive_message", {
         message: data.message,
+        userName: socket.user.name,
+      });
+
+      // Send to self
+      socket.emit("receive_message", {
+        message: data.message,
+        userName: socket.user.name,
       });
     });
 
@@ -77,14 +98,14 @@ const attachSocketIO = (app) => {
       console.log(
         `User disconnected: ${socket.id} with id: ${socket.user.user_id} and reason: ${reason}`
       );
-
-      connectedSockets[socket.user.user_id] = (
-        connectedSockets[socket.user.user_id] ?? []
-      ).filter((s) => socket.id !== s.id);
     });
   });
 
-  io.on("disconnect", (socket) => {});
+  io.on("disconnect", (socket) => {
+    console.log(
+      `User disconnected: ${socket.id} with id: ${socket.user.user_id} and reason: ${reason}`
+    );
+  });
 
   return server;
 };

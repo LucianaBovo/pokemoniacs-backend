@@ -75,7 +75,7 @@ CREATE TABLE public.users (
 -- Dependencies: 215
 -- Data for Name: cards; Type: TABLE DATA; Schema: public; Owner: postgres
 --
-
+ 
 
 --
 -- TOC entry 3469 (class 2606 OID 16430)
@@ -109,9 +109,6 @@ ALTER TABLE ONLY public.users
 -- Name: cards userid-fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.cards
-    ADD CONSTRAINT "userid-fkey" FOREIGN KEY ("userId") REFERENCES public.users(id) NOT VALID;
-
 
 -- Completed on 2022-11-23 18:47:53 CET
 
@@ -119,3 +116,30 @@ ALTER TABLE ONLY public.cards
 -- PostgreSQL database dump complete
 --
 
+-- New stuff
+
+CREATE TABLE public.chat_rooms (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    "userId1" uuid NOT NULL, 
+    "userId2" uuid NOT NULL
+);
+
+CREATE TABLE public.chat_room_messages (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    "chatRoomId" uuid NOT NULL,
+    "userId" uuid NOT NULL,
+    message text NOT NULL,
+    "createdAt" timestamp without time zone NOT NULL DEFAULT now(),
+);
+
+ALTER TABLE ONLY public.chat_rooms
+    ADD CONSTRAINT "userid1-fkey" FOREIGN KEY ("userId1") REFERENCES public.users(id) ;
+
+ALTER TABLE ONLY public.chat_rooms
+    ADD CONSTRAINT "userid2-fkey" FOREIGN KEY ("userId2") REFERENCES public.users(id);
+
+ALTER TABLE ONLY public.chat_room_messages
+    ADD CONSTRAINT "userid-fkey" FOREIGN KEY ("userId") REFERENCES public.users(id) ;
+
+ALTER TABLE ONLY public.chat_room_messages
+    ADD CONSTRAINT "chatRoomId-fkey" FOREIGN KEY ("chatRoomId") REFERENCES public.chat_rooms(id);
