@@ -13,9 +13,6 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// This set all routes to be authenticated by auth0
-// app.use(jwtCheck);
-
 app.get("/", async (req, res) => {
   return res.json({ success: true });
 });
@@ -50,6 +47,27 @@ app.get("/users/:id/cards", async (req, res) => {
     const userId = req.params.id;
     const result = await UsersService.getUserCards(userId);
     return res.json(result);
+  } catch (error) {
+    return res.status(500).json({ error: "Error fetching user cards." });
+  }
+});
+
+app.delete("/users/:userId/cards/:cardId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const cardId = req.params.cardId;
+    if (!userId || !cardId) {
+      return res.status(400).send({ error: "Invalid input." });
+    }
+
+    const card = await CardsService.getCardById(cardId);
+    if (card.userId !== userId) {
+      return res
+        .status(400).send({ error: "Card does not belong to user." });
+    }
+
+    await UsersService.deleteUserCard(cardId, userId);
+    return res.status(200).json({ success: true });
   } catch (error) {
     return res.status(500).json({ error: "Error fetching user cards." });
   }
@@ -129,7 +147,7 @@ app.get("/cards/:id", async (req, res) => {
 
 app.post("/users/:userId/cards", async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.params.id;
     const data = req.body;
     const { name, picture, condition, price } = data;
     if (!name || !picture || !condition || !price) {
@@ -146,3 +164,5 @@ app.post("/users/:userId/cards", async (req, res) => {
 attachSocketIO(app).listen(process.env.PORT || 3001, () => {
   console.log("app listening on port 3001");
 });
+
+

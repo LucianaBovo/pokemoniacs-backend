@@ -8,7 +8,7 @@ const createUser = async (data) => {
     if (user) {
       return user.id;
     }
-  
+
     const id = uuidv4();
     const date = new Date().toString();
     const createdAt = date.slice(0, 24);
@@ -48,6 +48,7 @@ const getUserById = async (userId) => {
     throw error;
   }
 };
+
 const getUserBySub = async (sub) => {
   try {
     const result = await DB.query('SELECT * FROM users WHERE sub = $1', [sub]);
@@ -72,6 +73,16 @@ const getUserCards = async (userId) => {
   }
 };
 
+const deleteUserCard = async (cardId, userId) => {
+  try {
+    const result = await DB.query(`DELETE FROM cards WHERE cards."id" = $1 AND cards."userId" = $2`, [cardId, userId]);
+    return result.rows;
+  } catch (error) {
+    console.log('Error deleting pokemon card.', error);
+    throw error;
+  }
+}
+
 const createUserCard = async (userId, data) => {
   try {
     const id = uuidv4();
@@ -79,7 +90,7 @@ const createUserCard = async (userId, data) => {
     const createdAt = date.slice(0, 24);
     const { name, picture, condition, price } = data;
     const status = CardStatus.AVAILABLE;
-  
+
     await DB.query(
       `INSERT INTO cards (id, name, picture, condition, price, status, "createdAt", "userId")  
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [id, name, picture, condition, price, status, createdAt, userId]);
@@ -90,4 +101,4 @@ const createUserCard = async (userId, data) => {
   }
 };
 
-module.exports = { createUser, getUsers, getUserById, getUserCards, createUserCard };
+module.exports = { createUser, getUsers, getUserById, getUserCards, createUserCard, deleteUserCard };
