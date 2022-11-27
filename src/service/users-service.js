@@ -65,7 +65,7 @@ const getUserBySub = async (sub) => {
 
 const getUserCards = async (userId) => {
   try {
-    const result = await DB.query(`SELECT * FROM cards WHERE cards."userId" = $1`, [userId]);
+    const result = await DB.query(`SELECT * FROM cards WHERE cards."userId" = $1 ORDER BY "updatedAt" DESC`, [userId]);
     return result.rows;
   } catch (error) {
     console.log('Error fetching users pokemon cards.', error);
@@ -93,9 +93,12 @@ const createUserCard = async (userId, data) => {
 
 const updateUserCard = async (price, condition, status, cardId, userId) => {
   try {
+    const updatedAt = new Date().toString().slice(0, 24);
     const result = await DB.query(`UPDATE cards SET condition = COALESCE($1, condition),
-     price = COALESCE($2, price), status = COALESCE($3, status) WHERE cards."id" = $4 AND cards."userId" = $5`,
-      [condition, price, status, cardId, userId]);
+     price = COALESCE($2, price), status = COALESCE($3, status), "updatedAt" = $4 
+     WHERE cards."id" = $5 AND cards."userId" = $6
+     RETURNING *`,
+      [condition, price, status, updatedAt, cardId, userId]);
     return result.rows[0];
   } catch (error) {
     console.log('Error updating card.', error);
