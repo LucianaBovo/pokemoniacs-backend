@@ -73,9 +73,6 @@ app.put("/users/:userId/cards/:cardId", async (req, res) => {
   }
 });
 
-
-
-
 app.delete("/users/:userId/cards/:cardId", async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -171,7 +168,7 @@ app.get("/cards/:id", async (req, res) => {
 
 app.post("/users/:userId/cards", async (req, res) => {
   try {
-    const userId = req.params.id;
+    const userId = req.params.userId;
     const data = req.body;
     const { name, picture, condition, price } = data;
     if (!name || !picture || !condition || !price) {
