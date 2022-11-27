@@ -93,10 +93,9 @@ const createUserCard = async (userId, data) => {
 
 const updateUserCard = async (newData, cardId, userId) => {
   try {
-    const { condition, price, status } = newData;
-    const result = await DB.query(`UPDATE cards SET condition = $1, price = $2,
-     status = $3 WHERE cards."id" = $4 AND cards."userId" = $5`,
-      [condition, price, status, cardId, userId]);
+    const { condition, price } = newData;
+    const result = await DB.query(`UPDATE cards SET condition = $1, price = $2 WHERE cards."id" = $3 AND cards."userId" = $4`,
+      [condition, price, cardId, userId]);
   } catch (error) {
     console.log('Error updating card.', error);
   }
