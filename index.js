@@ -56,7 +56,7 @@ app.put("/users/:userId/cards/:cardId", async (req, res) => {
   try {
     const userId = req.params.userId;
     const cardId = req.params.cardId;
-    const { body } = req;
+    const { price, condition, status } = req.body;
     if (!userId || !cardId) {
       return res.status(400).send({ error: "Invalid input." });
     }
@@ -66,7 +66,7 @@ app.put("/users/:userId/cards/:cardId", async (req, res) => {
         .status(400).send({ error: "Card does not belong to user." });
     }
 
-    await UsersService.updateUserCard(body, cardId, userId);
+    await UsersService.updateUserCard(price, condition, status, cardId, userId);
     return res.status(200).json({ success: true });
   } catch (error) {
     return res.status(500).json({ error: "Error fetching user cards." });
