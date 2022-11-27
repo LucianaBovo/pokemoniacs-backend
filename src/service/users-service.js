@@ -96,6 +96,7 @@ const updateUserCard = async (price, condition, status, cardId, userId) => {
     const result = await DB.query(`UPDATE cards SET condition = COALESCE($1, condition),
      price = COALESCE($2, price), status = COALESCE($3, status) WHERE cards."id" = $4 AND cards."userId" = $5`,
       [condition, price, status, cardId, userId]);
+    return result.rows[0];
   } catch (error) {
     console.log('Error updating card.', error);
   }
