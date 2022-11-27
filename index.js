@@ -52,6 +52,30 @@ app.get("/users/:id/cards", async (req, res) => {
   }
 });
 
+app.put("/users/:userId/cards/:cardId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const cardId = req.params.cardId;
+    const { body } = req;
+    if (!userId || !cardId) {
+      return res.status(400).send({ error: "Invalid input." });
+    }
+    const card = await CardsService.getCardById(cardId);
+    if (card.userId !== userId) {
+      return res
+        .status(400).send({ error: "Card does not belong to user." });
+    }
+
+    await UsersService.updateUserCard(body, cardId, userId);
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    return res.status(500).json({ error: "Error fetching user cards." });
+  }
+});
+
+
+
+
 app.delete("/users/:userId/cards/:cardId", async (req, res) => {
   try {
     const userId = req.params.userId;

@@ -73,16 +73,6 @@ const getUserCards = async (userId) => {
   }
 };
 
-const deleteUserCard = async (cardId, userId) => {
-  try {
-    const result = await DB.query(`DELETE FROM cards WHERE cards."id" = $1 AND cards."userId" = $2`, [cardId, userId]);
-    return result.rows;
-  } catch (error) {
-    console.log('Error deleting pokemon card.', error);
-    throw error;
-  }
-}
-
 const createUserCard = async (userId, data) => {
   try {
     const id = uuidv4();
@@ -101,4 +91,26 @@ const createUserCard = async (userId, data) => {
   }
 };
 
-module.exports = { createUser, getUsers, getUserById, getUserCards, createUserCard, deleteUserCard };
+const updateUserCard = async (newData, cardId, userId) => {
+  try {
+    const { condition, price, status } = newData;
+    const result = await DB.query(`UPDATE cards SET condition = $1, price = $2,
+     status = $3 WHERE cards."id" = $4 AND cards."userId" = $5`,
+      [condition, price, status, cardId, userId]);
+  } catch (error) {
+    console.log('Error updating card.', error);
+  }
+};
+
+const deleteUserCard = async (cardId, userId) => {
+  try {
+    const result = await DB.query(`DELETE FROM cards WHERE cards."id" = $1 AND cards."userId" = $2`, [cardId, userId]);
+    return result.rows;
+  } catch (error) {
+    console.log('Error deleting pokemon card.', error);
+    throw error;
+  }
+}
+
+
+module.exports = { createUser, getUsers, getUserById, getUserCards, createUserCard, deleteUserCard, updateUserCard };
