@@ -120,4 +120,4 @@ const deleteUserCard = async (cardId, userId) => {
   }
 }
 
-module.exports = { createUser, getUsers, getUserById, getUserCards, createUserCard, deleteUserCard, updateUserCard };
+module.exports = { createUser, getUsers, getUserById, getUserCards, createUserCard, deleteUserCard, updateUserCard, getUserBySub };
