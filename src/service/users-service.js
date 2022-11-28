@@ -82,13 +82,13 @@ const createUserCard = async (userId, data) => {
     const id = uuidv4();
     const date = new Date().toString();
     const createdAt = date.slice(0, 24);
-    const { name, picture, condition, price } = data;
+    const { name, picture, condition, price, types, series } = data;
     const status = CardStatus.AVAILABLE;
 
     await DB.query(
-      `INSERT INTO cards (id, name, picture, condition, price, status, "createdAt", "userId")  
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [id, name, picture, condition, price, status, createdAt, userId]
+      `INSERT INTO cards (id, name, picture, condition, price, types, series, status, "createdAt", "userId")  
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [id, name, picture, condition, price, types, series, status, createdAt, userId]
     );
   } catch (error) {
     console.log("Error inserting user.", error);

@@ -172,8 +172,8 @@ app.post("/users/:userId/cards", async (req, res) => {
   try {
     const userId = req.params.userId;
     const data = req.body;
-    const { name, picture, condition, price } = data;
-    if (!name || !picture || !condition || !price) {
+    const { name, picture, condition, price, types, series } = data;
+    if (!name || !picture || !condition || !price || !types || !series) {
       return res.status(400).send({ error: "Invalid input." });
     }
 
