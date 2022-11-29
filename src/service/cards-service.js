@@ -25,7 +25,8 @@ const getAvailableCards = async (searchOptions) => {
 
 const getCardById = async (cardId) => {
   try {
-    const result = await DB.query('SELECT * FROM cards WHERE id = $1', [cardId]);
+    const result = await DB.query(`SELECT cards.*, users.name as "sellerName" FROM cards 
+      LEFT JOIN users on cards."userId" = users.id WHERE cards.id = $1`, [cardId]);
     if (result.rows.length === 0) {
       return undefined;
     }
