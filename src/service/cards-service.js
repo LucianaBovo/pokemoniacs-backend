@@ -2,9 +2,20 @@ const { v4: uuidv4 } = require('uuid');
 const DB = require('../utils/db');
 const { CardStatus } = require('../utils/constants');
 
-const getAvailableCards = async () => {
+const getAvailableCards = async (searchOptions) => {
   try {
-    const result = await DB.query('SELECT * FROM cards WHERE status = $1', [CardStatus.AVAILABLE]);
+    const { name } = searchOptions;
+    let nameTerm;
+    let query = 'SELECT * FROM cards WHERE status = $1';
+    const queryParams = [CardStatus.AVAILABLE];
+
+    if (name) {
+      nameTerm = `%${name}%`;
+      query += ' AND name ILIKE $2';
+      queryParams.push(nameTerm);
+    }
+  
+    const result = await DB.query(query, queryParams);
     return result.rows;
   } catch (error) {
     console.log('Error fetching available cards.', error);
