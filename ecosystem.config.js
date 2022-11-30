@@ -3,7 +3,8 @@ module.exports = {
     {
       name: "pokemoniacs-backend",
       script: "./index.js",
-      instances: "2",
+      instances: "1",
+      exec_mode: "cluster",
       env: {
         NODE_ENV: "development",
       },
