@@ -21,9 +21,9 @@ const attachSocketIO = (app) => {
   const io = new Server(server, {
     cors: {
       origin: process.env.CORS_ORIGIN,
-      methods: ["GET", "POST", "PUT", "DELETE"],
+      methods: ["GET", "POST", "PUT", "DELETE"]
     },
-});
+  });
 
   io.use(async (socket, next) => {
     if (socket.handshake.query && socket.handshake.query.accessToken) {
