@@ -5,11 +5,14 @@ dotenv.config();
 const { Server } = require("socket.io");
 const http = require("http");
 const jwt = require("jsonwebtoken");
+const { createAdapter } = require("@socket.io/cluster-adapter");
+
 const cors = require("cors");
 const { verifyJwtCheck, getUser } = require("../utils/auth");
 const UsersService = require("../service/users-service");
 const ChatRoomService = require("../service/chat-rooms-service");
 const ChatRoomMessageService = require("../service/chat-room-messages-service");
+const { setupWorker } = require("@socket.io/sticky");
 
 const users = {};
 

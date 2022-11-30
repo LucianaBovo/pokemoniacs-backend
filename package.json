@@ -11,6 +11,8 @@
   "author": "Farhana, Luciana, Thomas",
   "license": "ISC",
   "dependencies": {
+    "@socket.io/cluster-adapter": "^0.2.1",
+    "@socket.io/sticky": "^1.0.2",
     "auth0": "^2.44.0",
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",
