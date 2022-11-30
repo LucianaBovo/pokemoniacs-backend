@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
-    "start": "pm2 start ecosystem.config.js --env production"
+    "start": "node index.js --env production"
   },
   "author": "Farhana, Luciana, Thomas",
   "license": "ISC",
