@@ -2,33 +2,21 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
-const { createServer } = require("http");
 const { Server } = require("socket.io");
 const http = require("http");
-const jwt = require("jsonwebtoken");
-const cors = require("cors");
 const { verifyJwtCheck, getUser } = require("../utils/auth");
-const { createAdapter } = require("@socket.io/cluster-adapter");
-const { setupWorker } = require("@socket.io/sticky");
 const UsersService = require("../service/users-service");
 const ChatRoomService = require("../service/chat-rooms-service");
 const ChatRoomMessageService = require("../service/chat-room-messages-service");
 
-const users = {};
-
-const httpServer = createServer();
 const attachSocketIO = (app) => {
   const server = http.createServer(app);
-  const io = new Server(httpServer, {
+  const io = new Server(server, {
     cors: {
       origin: process.env.CORS_ORIGIN,
       methods: ["GET", "POST"],
     },
   });
-
-  io.adapter(createAdapter());
-
-  setupWorker(io);
 
   io.use(async (socket, next) => {
     if (socket.handshake.query && socket.handshake.query.accessToken) {
