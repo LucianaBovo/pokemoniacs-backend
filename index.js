@@ -145,8 +145,9 @@ app.get("/auth0/users/:userId", jwtCheck, async (req, res) => {
 
 app.get("/cards/available", async (req, res) => {
   try {
-    const searchOptions = { name: req.query.name };
-    const result = await CardsService.getAvailableCards(searchOptions);
+    const searchTerm = req.query.searchTerm;
+    console.log(searchTerm)
+    const result = await CardsService.getAvailableCards(searchTerm);
     return res.json(result);
   } catch (error) {
     return res.status(500).json({ error: "Error fetching available cards." });

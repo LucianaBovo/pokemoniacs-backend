@@ -2,19 +2,17 @@ const { v4: uuidv4 } = require('uuid');
 const DB = require('../utils/db');
 const { CardStatus } = require('../utils/constants');
 
-const getAvailableCards = async (searchOptions) => {
+const getAvailableCards = async (searchTerm) => {
   try {
-    const { name } = searchOptions;
-    let nameTerm;
     let query = 'SELECT * FROM cards WHERE status = $1';
     const queryParams = [CardStatus.AVAILABLE];
-
-    if (name) {
-      nameTerm = `%${name}%`;
-      query += ' AND name ILIKE $2';
-      queryParams.push(nameTerm);
+    if (searchTerm) {
+      const ilikeTerm = `%${searchTerm}%`;
+      query += " AND (name ILIKE $2 OR series ILIKE $2 OR $3 = ANY(lower(types::text)::text[]))"; 
+      queryParams.push(ilikeTerm);
+      queryParams.push(searchTerm.toLowerCase());
     }
-  
+
     const result = await DB.query(query, queryParams);
     return result.rows;
   } catch (error) {
